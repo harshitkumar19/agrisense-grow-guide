@@ -5,9 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const CropRecommender = () => {
   const [result, setResult] = useState<string>("None");
+  const [loading, setLoading] = useState(false);
+  const [recommendation, setRecommendation] = useState<string>("");
   
   const seasons = ["Rabi", "Kharif", "Winter", "Whole Year", "Autumn", "Summer"];
   const states = [
@@ -19,18 +22,46 @@ const CropRecommender = () => {
     "Telangana", "Arunachal Pradesh", "Sikkim"
   ];
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoading(true);
+    
     const formData = new FormData(e.currentTarget);
     
-    // Simulate recommendation logic
-    const crops = ["Rice", "Wheat", "Cotton", "Sugarcane", "Maize", "Pulses", "Groundnut", "Soybean"];
-    const recommendedCrop = crops[Math.floor(Math.random() * crops.length)];
-    
-    setResult(recommendedCrop);
-    toast.success(`Recommended: ${recommendedCrop}`, {
-      description: "Based on your input parameters"
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('recommend-crop', {
+        body: {
+          cropYear: formData.get('Crop_Year'),
+          season: formData.get('Season'),
+          state: formData.get('State'),
+          rainfall: formData.get('Annual_Rainfall'),
+          fertilizer: formData.get('Fertilizer'),
+          pesticide: formData.get('Pesticide'),
+          area: formData.get('Area'),
+        }
+      });
+
+      if (error) throw error;
+
+      // Parse the AI recommendation
+      const recommendationText = data.recommendation;
+      const cropMatch = recommendationText.match(/CROP:\s*(.+)/i);
+      const cropName = cropMatch ? cropMatch[1].trim() : "Unable to determine";
+      
+      setResult(cropName);
+      setRecommendation(recommendationText);
+      
+      toast.success(`Recommended: ${cropName}`, {
+        description: "AI-powered recommendation based on your parameters"
+      });
+    } catch (error: any) {
+      console.error('Error getting recommendation:', error);
+      toast.error('Failed to get recommendation', {
+        description: error.message || 'Please try again'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -99,25 +130,32 @@ const CropRecommender = () => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
-                Recommend Crop
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
+                {loading ? "Analyzing..." : "Recommend Crop"}
               </Button>
             </form>
           </Card>
           
           {/* Result Section */}
-          <Card className="p-6 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5 shadow-[var(--shadow-card)]">
-            <div className="text-center">
+          <Card className="p-6 bg-gradient-to-br from-primary/5 to-accent/5 shadow-[var(--shadow-card)]">
+            <div className="text-center mb-6">
               <h3 className="text-2xl font-semibold mb-4 text-foreground">Recommended Crop:</h3>
               <div className="text-5xl font-bold text-primary mb-4">
-                {result}
+                {loading ? "..." : result}
               </div>
-              {result !== "None" && (
-                <p className="text-muted-foreground">
-                  This recommendation is based on your agricultural parameters
-                </p>
-              )}
             </div>
+            {recommendation && result !== "None" && (
+              <div className="text-left space-y-3 text-sm">
+                <div className="p-4 bg-background/50 rounded-lg">
+                  <pre className="whitespace-pre-wrap font-sans text-foreground/80">
+                    {recommendation}
+                  </pre>
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  AI-powered recommendation using machine learning analysis
+                </p>
+              </div>
+            )}
           </Card>
         </div>
       </div>
