@@ -11,46 +11,34 @@ serve(async (req) => {
   }
 
   try {
-    const { cropYear, season, state, rainfall, fertilizer, pesticide, area } = await req.json();
+    const { cropYear, season, district, fertilizer, pesticide, area } = await req.json();
     
-    console.log('Received crop recommendation request:', { cropYear, season, state, rainfall, fertilizer, pesticide, area });
+    console.log('Received crop recommendation request:', { cropYear, season, district, fertilizer, pesticide, area });
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `You are an agricultural expert AI that recommends optimal crops based on various farming parameters. 
-Analyze the provided data and recommend the most suitable crop with detailed reasoning.
+    const systemPrompt = `You are an agricultural expert AI that recommends optimal crops for farming in Uttar Pradesh districts.
+Analyze the provided data and recommend the most suitable crop.
 
-Consider:
-- Climate and seasonal patterns
-- Regional agricultural practices
-- Soil conditions implied by rainfall
-- Input resources (fertilizer, pesticide)
-- Farm size and scalability
+You MUST provide your response in this exact format:
+CROP: [Crop name]
+Since rainfall in selected area is [estimated rainfall in mm for that district], soil type is [typical soil type for that district in UP]
+REASONING: [2-3 sentences explaining why this crop is suitable]
+YIELD: [Expected yield estimate per acre]
+TIPS: [2-3 practical farming tips]`;
 
-Provide a concise recommendation with:
-1. Recommended crop name
-2. Brief reasoning (2-3 sentences)
-3. Expected yield estimate
-4. Key cultivation tips`;
+    const userPrompt = `Based on these parameters, recommend the best crop:
+- Year: ${cropYear}
+- Season: ${season}
+- District: ${district}, Uttar Pradesh
+- Fertilizer Available: ${fertilizer}kg
+- Pesticide Available: ${pesticide}kg
+- Area: ${area} acres
 
-    const userPrompt = `Based on the following agricultural parameters, recommend the best crop:
-
-Crop Year: ${cropYear}
-Season: ${season}
-State: ${state}
-Annual Rainfall: ${rainfall} mm
-Fertilizer: ${fertilizer} kg
-Pesticide: ${pesticide} kg
-Area: ${area} hectares
-
-Provide your recommendation in this format:
-CROP: [crop name]
-REASONING: [why this crop is suitable]
-YIELD: [expected yield estimate]
-TIPS: [key cultivation tips]`;
+Please analyze and provide your recommendation. Include estimated rainfall and typical soil type for ${district} district.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

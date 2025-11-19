@@ -12,14 +12,20 @@ const CropRecommender = () => {
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<string>("");
   
-  const seasons = ["Rabi", "Kharif", "Winter", "Whole Year", "Autumn", "Summer"];
-  const states = [
-    "Assam", "Karnataka", "Kerala", "Meghalaya", "West Bengal", "Puducherry",
-    "Goa", "Andhra Pradesh", "Tamil Nadu", "Odisha", "Bihar", "Gujarat",
-    "Madhya Pradesh", "Maharashtra", "Mizoram", "Punjab", "Uttar Pradesh",
-    "Haryana", "Himachal Pradesh", "Tripura", "Nagaland", "Chhattisgarh",
-    "Uttarakhand", "Jharkhand", "Delhi", "Manipur", "Jammu and Kashmir",
-    "Telangana", "Arunachal Pradesh", "Sikkim"
+  const seasons = ["Rabi (Winter)", "Kharif (Summer)", "Zaid (Spring)"];
+  const districts = [
+    "Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh",
+    "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly",
+    "Basti", "Bhadohi", "Bijnor", "Budaun", "Bulandshahr", "Chandauli", "Chitrakoot",
+    "Deoria", "Etah", "Etawah", "Ayodhya", "Farrukhabad", "Fatehpur", "Firozabad",
+    "Gautam Buddha Nagar", "Ghaziabad", "Ghazipur", "Gonda", "Gorakhpur", "Hamirpur",
+    "Hapur", "Hardoi", "Hathras", "Jalaun", "Jaunpur", "Jhansi", "Kannauj",
+    "Kanpur Dehat", "Kanpur Nagar", "Kasganj", "Kaushambi", "Kushinagar", "Lakhimpur Kheri",
+    "Lalitpur", "Lucknow", "Maharajganj", "Mahoba", "Mainpuri", "Mathura", "Mau",
+    "Meerut", "Mirzapur", "Moradabad", "Muzaffarnagar", "Pilibhit", "Pratapgarh",
+    "Prayagraj", "Raebareli", "Rampur", "Saharanpur", "Sambhal", "Sant Kabir Nagar",
+    "Shahjahanpur", "Shamli", "Shravasti", "Siddharthnagar", "Sitapur", "Sonbhadra",
+    "Sultanpur", "Unnao", "Varanasi"
   ];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -33,8 +39,7 @@ const CropRecommender = () => {
         body: {
           cropYear: formData.get('Crop_Year'),
           season: formData.get('Season'),
-          state: formData.get('State'),
-          rainfall: formData.get('Annual_Rainfall'),
+          district: formData.get('District'),
           fertilizer: formData.get('Fertilizer'),
           pesticide: formData.get('Pesticide'),
           area: formData.get('Area'),
@@ -78,7 +83,15 @@ const CropRecommender = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="Crop_Year">Crop Year</Label>
-                  <Input type="number" id="Crop_Year" name="Crop_Year" placeholder="e.g. 2024" min="1997" required />
+                  <Input 
+                    type="number" 
+                    id="Crop_Year" 
+                    name="Crop_Year" 
+                    placeholder="e.g. 2024" 
+                    min="1997" 
+                    max={new Date().getFullYear()}
+                    required 
+                  />
                 </div>
                 
                 <div className="space-y-2">
@@ -96,22 +109,17 @@ const CropRecommender = () => {
                 </div>
                 
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="State">State</Label>
-                  <Select name="State" required>
+                  <Label htmlFor="District">District (Uttar Pradesh)</Label>
+                  <Select name="District" required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select State" />
+                      <SelectValue placeholder="Select District" />
                     </SelectTrigger>
                     <SelectContent>
-                      {states.map(state => (
-                        <SelectItem key={state} value={state}>{state}</SelectItem>
+                      {districts.map(district => (
+                        <SelectItem key={district} value={district}>{district}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="Annual_Rainfall">Annual Rainfall (mm)</Label>
-                  <Input type="number" id="Annual_Rainfall" name="Annual_Rainfall" placeholder="e.g. 930" min="0" />
                 </div>
                 
                 <div className="space-y-2">
@@ -125,8 +133,8 @@ const CropRecommender = () => {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="Area">Area (hectares)</Label>
-                  <Input type="number" id="Area" name="Area" placeholder="e.g. 1000" min="1000" />
+                  <Label htmlFor="Area">Area (Acres)</Label>
+                  <Input type="number" id="Area" name="Area" min="0.1" step="0.1" required />
                 </div>
               </div>
               
