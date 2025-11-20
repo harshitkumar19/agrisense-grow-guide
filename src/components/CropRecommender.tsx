@@ -12,7 +12,9 @@ const CropRecommender = () => {
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<string>("");
   
-  const seasons = ["Rabi (Winter)", "Kharif (Summer)", "Zaid (Spring)"];
+  const seasons = language === "en" 
+    ? ["Rabi (Winter)", "Kharif (Summer)", "Zaid (Spring)"]
+    : ["रबी (सर्दी)", "खरीफ (गर्मी)", "जायद (वसंत)"];
   const districts = [
     "Agra", "Aligarh", "Ambedkar Nagar", "Amethi", "Amroha", "Auraiya", "Azamgarh",
     "Baghpat", "Bahraich", "Ballia", "Balrampur", "Banda", "Barabanki", "Bareilly",
