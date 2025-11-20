@@ -6,13 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Globe } from "lucide-react";
 
-const CropRecommender = () => {
+interface CropRecommenderProps {
+  language: "en" | "hi";
+}
+
+const CropRecommender = ({ language }: CropRecommenderProps) => {
   const [result, setResult] = useState<string>("None");
   const [loading, setLoading] = useState(false);
   const [recommendation, setRecommendation] = useState<string>("");
-  const [language, setLanguage] = useState<"en" | "hi">("en");
 
   const translations = {
     en: {
@@ -112,20 +114,9 @@ const CropRecommender = () => {
   return (
     <section id="recommender" className="py-16 px-4 bg-muted/30">
       <div className="container mx-auto max-w-7xl">
-        <div className="flex justify-between items-center mb-12">
-          <h2 className="text-4xl font-bold text-foreground">
-            {t.title}
-          </h2>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setLanguage(language === "en" ? "hi" : "en")}
-            className="gap-2"
-          >
-            <Globe className="h-4 w-4" />
-            {language === "en" ? "हिंदी" : "English"}
-          </Button>
-        </div>
+        <h2 className="text-4xl font-bold text-center mb-12 text-foreground">
+          {t.title}
+        </h2>
         
         <div className="grid md:grid-cols-2 gap-8">
           {/* Form Section */}
